@@ -1,5 +1,6 @@
 "use client";
 
+import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import { useMemo, useState } from "react";
 import { buildProjectionTable, Inputs } from "@/lib/calculations";
 import { formatMoney } from "@/lib/format";
@@ -55,6 +56,8 @@ function NumberInput({
 }
 
 export default function Home() {
+  const { isLoaded, isSignedIn } = useUser();
+
   // Scenario A (live as you type)
   const [draft, setDraft] = useState<Inputs>({
     currentAge: 35,
@@ -67,7 +70,9 @@ export default function Home() {
 
   // Scenario compare
   const [compareEnabled, setCompareEnabled] = useState(false);
-  const [scenarioB, setScenarioB] = useState<Pick<Inputs, "annualSavings" | "annualSpending" | "expectedReturnPct">>({
+  const [scenarioB, setScenarioB] = useState<
+    Pick<Inputs, "annualSavings" | "annualSpending" | "expectedReturnPct">
+  >({
     annualSavings: 35000,
     annualSpending: 60000,
     expectedReturnPct: 7,
@@ -164,7 +169,38 @@ export default function Home() {
             <a className="hover:text-gray-900" href="#pricing">
               Pricing
             </a>
-            <button className="rounded-lg border border-gray-200 px-3 py-1.5 hover:bg-gray-50">Log in</button>
+
+            {!isLoaded ? (
+              <div className="flex items-center gap-2 opacity-60">
+                <button className="rounded-lg border border-gray-200 px-3 py-1.5" disabled>
+                  Log in
+                </button>
+                <button className="rounded-lg bg-gray-900 text-white px-3 py-1.5" disabled>
+                  Sign up
+                </button>
+              </div>
+            ) : !isSignedIn ? (
+              <div className="flex items-center gap-2">
+                <SignInButton mode="modal">
+                  <button className="rounded-lg border border-gray-200 px-3 py-1.5 hover:bg-gray-50">
+                    Log in
+                  </button>
+                </SignInButton>
+
+                <SignUpButton mode="modal">
+                  <button className="rounded-lg bg-gray-900 text-white px-3 py-1.5 hover:bg-gray-800">
+                    Sign up
+                  </button>
+                </SignUpButton>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <a className="hover:text-gray-900" href="/dashboard">
+                  Dashboard
+                </a>
+                <UserButton />
+              </div>
+            )}
           </nav>
         </div>
       </header>
@@ -172,9 +208,7 @@ export default function Home() {
       <main className="mx-auto max-w-6xl px-6 py-10">
         {/* Hero */}
         <section className="mb-10">
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
-            Know your FI date — and what moves it.
-          </h1>
+          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Know your FI date — and what moves it.</h1>
           <p className="mt-3 text-gray-600 max-w-2xl">
             A transparent financial independence calculator built for serious planners. No hidden assumptions.
           </p>
@@ -317,7 +351,9 @@ export default function Home() {
                 </div>
                 <div>
                   <div className="text-xs text-gray-500">Years to FI</div>
-                  <div className="text-2xl font-semibold">{resultsA.yearsToFi === null ? "—" : resultsA.yearsToFi.toFixed(1)}</div>
+                  <div className="text-2xl font-semibold">
+                    {resultsA.yearsToFi === null ? "—" : resultsA.yearsToFi.toFixed(1)}
+                  </div>
                 </div>
                 <div>
                   <div className="text-xs text-gray-500">FI Target</div>
@@ -386,21 +422,31 @@ export default function Home() {
 
                     {/* FI markers */}
                     {fiPointA ? (
-                      <ReferenceDot x={fiPointA.age} y={fiPointA.netWorth} r={6} stroke="#111827" strokeWidth={2}
-                        label={{ value: "FI (A)", position: "top" }} />
+                      <ReferenceDot
+                        x={fiPointA.age}
+                        y={fiPointA.netWorth}
+                        r={6}
+                        stroke="#111827"
+                        strokeWidth={2}
+                        label={{ value: "FI (A)", position: "top" }}
+                      />
                     ) : null}
 
                     {compareEnabled && fiPointB ? (
-                      <ReferenceDot x={fiPointB.age} y={fiPointB.netWorth} r={6} stroke="#6b7280" strokeWidth={2}
-                        label={{ value: "FI (B)", position: "top" }} />
+                      <ReferenceDot
+                        x={fiPointB.age}
+                        y={fiPointB.netWorth}
+                        r={6}
+                        stroke="#6b7280"
+                        strokeWidth={2}
+                        label={{ value: "FI (B)", position: "top" }}
+                      />
                     ) : null}
                   </LineChart>
                 </ResponsiveContainer>
               </div>
 
-              <div className="mt-3 text-xs text-gray-500">
-                Tip: Try increasing savings or reducing spending to see how quickly your FI date moves.
-              </div>
+              <div className="mt-3 text-xs text-gray-500">Tip: Try increasing savings or reducing spending to see how quickly your FI date moves.</div>
             </div>
           </div>
         </section>
@@ -417,8 +463,7 @@ export default function Home() {
         <section id="pricing" className="mt-10">
           <h2 className="text-xl font-semibold">Pricing</h2>
           <p className="mt-2 text-gray-600 max-w-3xl">
-            Free calculator first. Pro ($5/month) will unlock sensitivity sliders, saved scenarios, scenario comparison,
-            and CSV export.
+            Free calculator first. Pro ($5/month) will unlock sensitivity sliders, saved scenarios, scenario comparison, and CSV export.
           </p>
         </section>
       </main>

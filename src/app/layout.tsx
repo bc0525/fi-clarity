@@ -1,4 +1,5 @@
 import { ClerkProvider } from "@clerk/nextjs";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 const metadata = {
@@ -30,6 +31,7 @@ export default function RootLayout({
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           {children}
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
